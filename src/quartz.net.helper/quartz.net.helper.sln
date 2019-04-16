@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.156
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "quartz.net.helper", "quartz.net.helper\quartz.net.helper.csproj", "{15B9F5CD-7D56-4BFE-A88E-B96470779F52}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{15B9F5CD-7D56-4BFE-A88E-B96470779F52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15B9F5CD-7D56-4BFE-A88E-B96470779F52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15B9F5CD-7D56-4BFE-A88E-B96470779F52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15B9F5CD-7D56-4BFE-A88E-B96470779F52}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BD5F37E7-1271-40D5-948A-DE3092024640}
+	EndGlobalSection
+EndGlobal
