@@ -78,6 +78,20 @@ namespace quartz.net.helper.tools
             return true;
         }
         /// <summary>
+        /// 关闭调度
+        /// </summary>
+        /// <param name="schedulerName"></param>
+        /// <returns></returns>
+        public static bool Stop(string schedulerName)
+        {
+            var currentScheduler = GetScheduler(schedulerName);
+            if (!currentScheduler.IsStarted || currentScheduler.IsShutdown)
+            {
+                currentScheduler.Shutdown();
+            }
+            return true;
+        }
+        /// <summary>
         /// 添加任务
         /// </summary>
         /// <param name="jobConfig"></param>
