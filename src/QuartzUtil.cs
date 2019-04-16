@@ -16,12 +16,10 @@ namespace Common.Quartz.Net
     {
 
         private static DirectSchedulerFactory _factory;//调度工厂（测试中。。。）
-        private static IScheduler Scheduler { get; set; }
+
         static QuartzUtil()
         {
-            _factory =DirectSchedulerFactory.Instance;
-            Scheduler = StdSchedulerFactory.GetDefaultScheduler().Result;
-            Scheduler.Start();
+            _factory = DirectSchedulerFactory.Instance;
         }
         #region Extend(测试中...)
         /// <summary>
@@ -32,8 +30,9 @@ namespace Common.Quartz.Net
         {
             try
             {
-                var pool = new DefaultThreadPool() {
-                    ThreadCount= schedulerConfig.ThreadCount
+                var pool = new DefaultThreadPool()
+                {
+                    ThreadCount = schedulerConfig.ThreadCount
                 };
                 _factory.CreateScheduler(schedulerConfig.SchedulerName, schedulerConfig.SchedulerId, pool, new RAMJobStore());
                 return true;
@@ -42,7 +41,7 @@ namespace Common.Quartz.Net
             {
                 return false;
             }
-           
+
         }
         /// <summary>
         /// 获取scheduler（策略：如果没有指定名称的调度器，那就使用默认的调度器）
@@ -52,13 +51,19 @@ namespace Common.Quartz.Net
         private static IScheduler GetScheduler(string schedulerName)
         {
             //获取指定的scheduler
-            IScheduler currentScheduler = _factory.GetScheduler(schedulerName==null?"":schedulerName).Result;
-            if (currentScheduler == null)
+            IScheduler currentScheduler = null;
+            if (!string.IsNullOrEmpty(schedulerName))
+            {
+                currentScheduler = _factory.GetScheduler(schedulerName).Result;
+            }
+            else
             {
                 currentScheduler = StdSchedulerFactory.GetDefaultScheduler().Result;
             }
             currentScheduler.Start();
             return currentScheduler;
+
+
         }
         #endregion
         /// <summary>
@@ -70,19 +75,19 @@ namespace Common.Quartz.Net
         {
             try
             {
-                bool isHasJob = Scheduler.CheckExists(JobKey.Create(jobConfig.JobName, jobConfig.JobGroup)).Result;
-                bool isHasTrigger = Scheduler.CheckExists(new TriggerKey(jobConfig.TriggerName, jobConfig.TriggerGroup)).Result;
-                if (isHasTrigger&&isHasJob) return false;
+                bool isHasJob = GetScheduler(jobConfig.SchedulerName).CheckExists(JobKey.Create(jobConfig.JobName, jobConfig.JobGroup)).Result;
+                bool isHasTrigger = GetScheduler(jobConfig.SchedulerName).CheckExists(new TriggerKey(jobConfig.TriggerName, jobConfig.TriggerGroup)).Result;
+                if (isHasTrigger && isHasJob) return false;
                 ITrigger trigger = TriggerBuilder.Create()
                               .WithIdentity(jobConfig.TriggerName, jobConfig.TriggerGroup)
                               .WithCronSchedule(jobConfig.CronExpression).Build();
                 IJobDetail jobDetail = JobBuilder.Create(jobConfig.JobType).SetJobData(new JobDataMap(jobConfig.JobDataMap)).WithIdentity(jobConfig.JobName, jobConfig.JobGroup).Build();
-                Scheduler.ScheduleJob(jobDetail, trigger);
+                GetScheduler(jobConfig.SchedulerName).ScheduleJob(jobDetail, trigger);
                 return true;
             }
             catch (Exception ex)
             {
-                
+
                 return false;
             }
 
@@ -99,7 +104,7 @@ namespace Common.Quartz.Net
         {
             try
             {
-                return Scheduler.CheckExists(JobKey.Create(jobName, jobGroup)).Result;
+                return GetScheduler(schedulerName).CheckExists(JobKey.Create(jobName, jobGroup)).Result;
             }
             catch (Exception ex)
             {
@@ -118,7 +123,7 @@ namespace Common.Quartz.Net
         {
             try
             {
-                return Scheduler.CheckExists(new TriggerKey(triggerName, triggerGroup)).Result;
+                return GetScheduler(schedulerName).CheckExists(new TriggerKey(triggerName, triggerGroup)).Result;
             }
             catch (Exception ex)
             {
@@ -130,39 +135,34 @@ namespace Common.Quartz.Net
         /// 清空调度器(策略:默认清理的是默认的调度器,指定调度器名称将会清理指定的调度器)
         /// </summary>
         /// <returns></returns>
-        public static bool ClearScheduler(string schedulerName="")
+        public static bool ClearScheduler(string schedulerName = "")
         {
             try
             {
+                IScheduler currentScheduler = null;
                 //获取指定的scheduler
-                IScheduler currentScheduler = _factory.GetScheduler(schedulerName == null ? "" : schedulerName).Result;
-                if (currentScheduler == null)
+                if (!string.IsNullOrEmpty(schedulerName))
+                {
+                    currentScheduler = _factory.GetScheduler(schedulerName).Result;
+                }
+                else
                 {
                     currentScheduler = StdSchedulerFactory.GetDefaultScheduler().Result;
                 }
-                currentScheduler.Clear();
-                return true;
+                if (currentScheduler != null)
+                {
+                    currentScheduler.Clear();
+                    return true;
+                }
+                return false;
             }
             catch (Exception ex)
             {
                 return false;
-               
+
             }
         }
-        /// <summary>
-        /// 构建cons表达式
-        /// </summary>
-        /// <param name="dateTime"></param>
-        /// <returns></returns>
-        public static string BuildConsExpression(DateTime dateTime)
-        {
-            if (dateTime.CompareTo(DateTime.Now) <= 0)
-            {
-                //过期的任务会延迟二十秒进行调度
-                dateTime = DateTime.Now.AddSeconds(20);
-            }
-            return string.Format("{0} {1} {2} {3} {4} ? {5}", dateTime.Second, dateTime.Minute, dateTime.Hour, dateTime.Day, dateTime.Month, dateTime.Year);
-        }
+
         /// <summary>
         /// 移除任务
         /// </summary>
@@ -174,9 +174,9 @@ namespace Common.Quartz.Net
             try
             {
                 TriggerKey triggerKey = new TriggerKey(jobConfig.TriggerName, jobConfig.TriggerGroup);
-                Scheduler.PauseTrigger(triggerKey);
-                Scheduler.ResumeTrigger(triggerKey);
-                Scheduler.DeleteJob(JobKey.Create(jobConfig.JobName, jobConfig.JobGroup));
+                GetScheduler(jobConfig.SchedulerName).PauseTrigger(triggerKey);
+                GetScheduler(jobConfig.SchedulerName).ResumeTrigger(triggerKey);
+                GetScheduler(jobConfig.SchedulerName).DeleteJob(JobKey.Create(jobConfig.JobName, jobConfig.JobGroup));
                 return true;
             }
             catch (Exception ex)
@@ -185,42 +185,6 @@ namespace Common.Quartz.Net
             }
 
 
-        }
-        /// <summary>
-        /// 构建触发器
-        /// </summary>
-        /// <param name="triggerName"></param>
-        /// <param name="groupName"></param>
-        /// <param name="cronExpression"></param>
-        /// <returns></returns>
-        public static ITrigger BuildTrigger(string triggerName, string groupName, string cronExpression)
-        {
-            ITrigger trigger = TriggerBuilder.Create()
-                                .WithIdentity(triggerName, groupName)
-                                .WithCronSchedule(cronExpression).Build();
-            return trigger;
-        }
-        /// <summary>
-        /// 构建任务
-        /// </summary>
-        /// <param name="jobName"></param>
-        /// <param name="groupName"></param>
-        /// <param name="jobType"></param>
-        /// <returns></returns>
-        public static IJobDetail BuildJob(string jobName, string groupName, Type jobType)
-        {
-            IJobDetail jobDetail = JobBuilder.Create(jobType).WithIdentity(jobName, groupName).Build();
-            return jobDetail;
-        }
-        /// <summary>
-        /// 绑定任务与触发器
-        /// </summary>
-        /// <param name="jobDetail"></param>
-        /// <param name="trigger"></param>
-        public static void BindJobAndTrigger(IJobDetail jobDetail, ITrigger trigger)
-        {
-
-            Scheduler.ScheduleJob(jobDetail, trigger);
         }
     }
 }
