@@ -1,4 +1,5 @@
-﻿using Quartz;
+﻿using quartz.net.helper.tools;
+using Quartz;
 using Quartz.Impl;
 using Quartz.Simpl;
 using System;
@@ -7,26 +8,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace quartz.net.helper.tools
+namespace ConsoleApp33.tools
 {
     /// <summary>
-    /// 调度工具类(Core)
+    /// 可依赖注入
     /// </summary>
-    public class QuartzUtil
+   public class QuartzContext
     {
+        private  DirectSchedulerFactory _factory;//调度工厂（测试中。。。）
+      
 
-        private static DirectSchedulerFactory _factory;//调度工厂（测试中。。。）
-
-        static QuartzUtil()
+        public QuartzContext()
         {
             _factory = DirectSchedulerFactory.Instance;
         }
-       
+
         /// <summary>
         /// 创建一个scheduler（自定义调度器的相关参数）
         /// </summary>
         /// <param name="schedulerConfig"></param>
-        public static bool CreateScheduler(SchedulerConfig schedulerConfig)
+        public  bool CreateScheduler(SchedulerConfig schedulerConfig)
         {
             try
             {
@@ -48,7 +49,7 @@ namespace quartz.net.helper.tools
         /// </summary>
         /// <param name="schedulerName"></param>
         /// <returns></returns>
-        private static IScheduler GetScheduler(string schedulerName)
+        private  IScheduler GetScheduler(string schedulerName)
         {
             //获取指定的scheduler
             IScheduler currentScheduler = null;
@@ -60,7 +61,7 @@ namespace quartz.net.helper.tools
             {
                 currentScheduler = StdSchedulerFactory.GetDefaultScheduler().Result;
             }
-           
+
             return currentScheduler;
         }
         /// <summary>
@@ -68,7 +69,7 @@ namespace quartz.net.helper.tools
         /// </summary>
         /// <param name="schedulerName"></param>
         /// <returns></returns>
-        public static bool Start(string schedulerName)
+        public  bool Start(string schedulerName)
         {
             var currentScheduler = GetScheduler(schedulerName);
             if (!currentScheduler.IsStarted || currentScheduler.IsShutdown)
@@ -82,7 +83,7 @@ namespace quartz.net.helper.tools
         /// </summary>
         /// <param name="schedulerName"></param>
         /// <returns></returns>
-        public static bool Stop(string schedulerName)
+        public  bool Stop(string schedulerName)
         {
             var currentScheduler = GetScheduler(schedulerName);
             if (!currentScheduler.IsStarted || currentScheduler.IsShutdown)
@@ -96,7 +97,7 @@ namespace quartz.net.helper.tools
         /// </summary>
         /// <param name="jobConfig"></param>
         /// <returns></returns>
-        public static bool AddJob(JobConfig jobConfig)
+        public  bool AddJob(JobConfig jobConfig)
         {
             try
             {
@@ -119,6 +120,7 @@ namespace quartz.net.helper.tools
 
 
         }
+
         /// <summary>
         /// 是否有job
         /// </summary>
@@ -126,7 +128,7 @@ namespace quartz.net.helper.tools
         /// <param name="jobGroup"></param>
         /// <param name="schedulerName"></param>
         /// <returns></returns>
-        public static bool IsHasJob(string jobName, string jobGroup, string schedulerName = "")
+        public  bool IsHasJob(string jobName, string jobGroup, string schedulerName = "")
         {
             try
             {
@@ -145,7 +147,7 @@ namespace quartz.net.helper.tools
         /// <param name="triggerGroup"></param>
         /// <param name="schedulerName"></param>
         /// <returns></returns>
-        public static bool IsHasTrigger(string triggerName, string triggerGroup, string schedulerName = "")
+        public  bool IsHasTrigger(string triggerName, string triggerGroup, string schedulerName = "")
         {
             try
             {
@@ -161,7 +163,7 @@ namespace quartz.net.helper.tools
         /// 清空调度器(策略:默认清理的是默认的调度器,指定调度器名称将会清理指定的调度器)
         /// </summary>
         /// <returns></returns>
-        public static bool ClearScheduler(string schedulerName = "")
+        public  bool ClearScheduler(string schedulerName = "")
         {
             try
             {
@@ -194,7 +196,7 @@ namespace quartz.net.helper.tools
         /// </summary>
         /// <param name="jobConfig"></param>
         /// <returns></returns>
-        public static bool RemoveJob(JobConfig jobConfig)
+        public  bool RemoveJob(JobConfig jobConfig)
         {
 
             try

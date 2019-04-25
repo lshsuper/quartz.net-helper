@@ -14,26 +14,26 @@ namespace quartz.net.helper
 
         {
 
-            QuartzUtil.CreateScheduler(new SchedulerConfig() {
-                SchedulerName="lsh",
-            });
-            QuartzUtil.Start("lsh");
-            QuartzUtil.AddJob(new JobConfig()
+            
+            QuartzHelper.Instance. Start("");
+
+            QuartzHelper.Instance.AddJob(new JobConfig()
             {
-                JobGroup = "jp",
-                JobName = "j",
-                TriggerGroup = "tg",
-                TriggerName = "t",
-                SchedulerName="lsh",
+                JobGroup = "第一个",
+                JobName = "第一个",
+                TriggerGroup = "第一个01",
+                TriggerName = "第一个",
+
+
                 JobType = typeof(SayHelloJob),
                 CronExpression = CronExpressionUtil.EverySeconds(5),
                 
             });
-
+            
         }
         public void Stop()
         {
-            QuartzUtil.ClearScheduler("lsh");
+            QuartzHelper.Instance.ClearScheduler("lsh");
         }
     }
 }
